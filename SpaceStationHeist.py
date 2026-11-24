@@ -876,3 +876,67 @@ else:
                 if st.button("🔁 Try again in the vault"):
                     retry_action()
 
+    # ============================================================
+    # SCENE 7 — ESCAPE BAY
+    # ============================================================
+
+    elif room == "escape_bay":
+
+        show_room(
+            "🚀 Escape Bay",
+            "The station is on lockdown. Security guards "
+            "are approaching. Your stolen shuttle is nearby."
+        )
+
+        if has_item("Star Core"):
+
+            st.success("💎 You have stolen the Star Core!")
+
+            if not st.session_state.action_complete:
+
+                chance_encounter(
+                    "🚀 Escape using your shuttle",
+                    "Escape Bay",
+                    "escaping aboard the stolen shuttle",
+                    4,
+                    "The player successfully escapes with the Star Core.",
+                    "You launch your shuttle just as the station "
+                    "locks down. The Star Core is yours!",
+                    "The shuttle fails to launch in time.",
+                    "Security fire hits your shuttle. "
+                    "You struggle to escape the station.",
+                    1,
+                    "Security Keycard"
+                )
+
+            else:
+
+                show_result()
+
+                if st.session_state.result_type == "success":
+
+                    st.header("🏆 HEIST COMPLETE!")
+
+                    st.balloons()
+
+                    st.write(
+                        "Congratulations! You escaped Elysium-9 "
+                        "with the legendary Star Core!"
+                    )
+
+                    if st.button("🔄 Play Again"):
+                        restart_game()
+
+                else:
+                    if st.button("🔄 Try to escape Again"):
+                        retry_action()
+
+        else:
+
+            st.error(
+                "You haven't stolen the Star Core. "
+                "You cannot complete the mission!"
+            )
+
+            if st.button("🔄 Try Again"):
+                restart_game()
