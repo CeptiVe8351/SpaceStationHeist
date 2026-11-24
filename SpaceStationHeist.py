@@ -123,7 +123,7 @@ def remove_item(item):
 def use_medkit():
     if has_item("Medkit"):
 
-        healed = heal_player(2)
+        healed = heal_player(3)
 
         # Only use the Medkit if health was actually restored
         if healed > 0:
@@ -277,7 +277,7 @@ def chance_encounter(
         else:
 
             take_damage(damage)
-            increase_security(20)
+            increase_security(15)
 
             story = generate_story(
                 room,
@@ -467,5 +467,127 @@ if not st.session_state.game_started:
 
         else:
             st.warning("Please enter your name first!")
+
+
+# ================================================================
+# 10. MAIN GAME
+# ================================================================
+
+else:
+
+    show_player_info()
+
+    room = get_current_room()
+
+    # GAME OVER CONDITIONS
+
+    if st.session_state.health <= 0:
+
+        show_room(
+            "💀 MISSION FAILED",
+            "Your injuries are too severe. NovaCorp security "
+            "has captured you."
+        )
+
+        if st.button("🔄 Try Again"):
+            restart_game()
+
+        st.stop()
+
+    if st.session_state.security >= 100:
+
+        show_room(
+            "🚨 YOU HAVE BEEN CAPTURED!",
+            "The station security system has locked down. "
+            "Armed guards surround you."
+        )
+
+        if st.button("🔄 Try Again"):
+            restart_game()
+
+        st.stop()
+
+
+    # ============================================================
+    # SCENE 1 — DOCKING BAY
+    # ============================================================
+
+    if room == "docking_bay":
+
+        show_room(
+            "🛸 Docking Bay",
+            "Your stolen shuttle docks at Elysium-9. "
+            "Two security guards are checking arriving ships."
+        )
+
+        if not st.session_state.action_complete:
+
+            chance_encounter(
+                "🥷 Sneak past the guards",
+                "Docking Bay",
+                "sneaking past the security guards",
+                4,
+                "The player successfully sneaks aboard.",
+                "You slip behind a cargo container and "
+                "make it past the guards unnoticed.",
+                "The player is spotted by a guard.",
+                "A guard spots you and raises the alarm!",
+                1
+            )
+
+        else:
+            show_result()
+            show_continue_button("Enter Engineering Room")
+
+
+    # ============================================================
+    # SCENE 2 — ENGINEERING ROOM
+    # ============================================================
+
+    elif room == "engineering":
+
+        show_room(
+            "🔧 Engineering Room",
+            "Machines fill the room. A technician has left "
+            "some equipment beside the control panel."
+        )
+
+        if not st.session_state.action_complete:
+
+            left, right = st.columns(2)
+
+            with left:
+
+                if st.button("🔎 Search the equipment"):
+
+                    add_item("Security Keycard")
+
+                    story = generate_story(
+                        "Engineering Room",
+                        "searching the equipment",
+                        "The player finds a Security Keycard.",
+                        "You search through the equipment "
+                        "and discover a Security Keycard."
+                    )
+
+                    set_result("item", story, "Security Keycard")
+
+            with right:
+
+                if st.button("🚪 Leave the room"):
+
+                    story = generate_story(
+                        "Engineering Room",
+                        "leaving without searching",
+                        "The player leaves without collecting equipment.",
+                        "You leave the equipment behind and "
+                        "continue through the station."
+                    )
+
+                    set_result("story", story)
+
+        else:
+            show_result()
+            show_continue_button("Enter Storage Bay")
 
 
