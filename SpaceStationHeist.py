@@ -591,3 +591,288 @@ else:
             show_continue_button("Enter Storage Bay")
 
 
+    # ============================================================
+    # SCENE 3 — STORAGE BAY
+    # ============================================================
+
+    elif room == "storage":
+
+        show_room(
+            "📦 Storage Bay",
+            "You discover several supply crates. One contains "
+            "medical supplies."
+        )
+
+        if not st.session_state.action_complete:
+
+            left, right = st.columns(2)
+
+            with left:
+
+                if st.button("🧪 Search for medical supplies"):
+
+                    add_item("Medkit")
+
+                    story = generate_story(
+                        "Storage Bay",
+                        "searching for medical supplies",
+                        "The player finds a Medkit.",
+                        "Inside a supply crate you find a "
+                        "Medkit that could save your life."
+                    )
+
+                    set_result("item", story, "Medkit")
+
+            with right:
+
+                if st.button("➡️ Continue onwards"):
+
+                    story = generate_story(
+                        "Storage Bay",
+                        "leaving the storage bay",
+                        "The player leaves without collecting supplies.",
+                        "You leave the crates behind and head "
+                        "towards security."
+                    )
+
+                    set_result("story", story)
+
+        else:
+            show_result()
+            show_continue_button("Enter Security Corridor")
+
+
+    # ============================================================
+    # SCENE 4 — SECURITY CORRIDOR
+    # ============================================================
+
+    elif room == "security":
+
+        show_room(
+            "🤖 Security Corridor",
+            "A powerful security robot blocks the corridor. "
+            "Its red scanning light moves across the walls."
+        )
+
+        if not st.session_state.action_complete:
+
+            combat_encounter(
+                "⚔️ Fight the Security Robot",
+                "security robot",
+                "Security Corridor",
+                5,       
+                1,       
+                20,      
+                "Hacking Device"
+            )
+
+            if has_item("Hacking Device"):
+
+                chance_encounter(
+                    "💻 Hack the security robot",
+                    "Security Corridor",
+                    "hacking the security robot",
+                    4,
+                    "The player successfully disables the robot.",
+                    "The robot powers down as your hacking "
+                    "device takes control.",
+                    "The hacking attempt fails.",
+                    "The robot detects your device and fires "
+                    "a laser blast!",
+                    1,
+                    "Hacking Device"
+                )
+
+            else:
+
+                chance_encounter(
+                    "🏃 Sneak past the robot",
+                    "Security Corridor",
+                    "sneaking past the robot",
+                    5,
+                    "The player sneaks past the robot.",
+                    "You carefully move through the shadows "
+                    "and avoid the robot's scanner.",
+                    "The robot detects the player.",
+                    "The robot detects your movement and "
+                    "fires a laser blast!",
+                    2
+                )
+
+        else:
+            show_result()
+            show_continue_button("Enter Control Room")
+
+
+    # ============================================================
+    # SCENE 5 — CONTROL ROOM
+    # ============================================================
+
+    elif room == "control_room":
+
+        show_room(
+            "🖥️ Control Room",
+            "You reach the main computer system. The vault "
+            "access code is stored somewhere inside."
+        )
+
+        if not st.session_state.action_complete:
+
+            if has_item("Hacking Device"):
+
+                if st.button("💻 Hack the main computer"):
+
+                    add_item("Vault Access Code")
+
+                    story = generate_story(
+                        "Control Room",
+                        "hacking the main computer",
+                        "The player discovers the Vault Access Code.",
+                        "You bypass the computer's security "
+                        "and discover the vault access code."
+                    )
+
+                    set_result("item", story, "Vault Access Code")
+
+            if st.button("🔎 Search the desk"):
+
+                add_item("Vault Access Code")
+
+                story = generate_story(
+                    "Control Room",
+                    "searching the computer desk",
+                    "The player finds the Vault Access Code.",
+                    "Hidden beneath a computer terminal, "
+                    "you discover a written vault access code."
+                )
+
+                set_result("item", story, "Vault Access Code")
+
+        else:
+            show_result()
+            show_continue_button("Enter the Star Core Vault")
+
+
+    
+    # ============================================================
+    # SCENE 6 — STAR CORE VAULT
+    # ============================================================
+
+    elif room == "vault":
+
+        show_room(
+            "💎 Star Core Vault",
+            "The enormous vault stands before you. The Star Core "
+            "glows brightly in the centre of the room."
+        )
+
+        # If the player already has the Star Core
+        if has_item("Star Core"):
+
+            st.success("💎 You have stolen the Star Core!")
+
+            if st.button("➡️ Enter Escape Bay"):
+                continue_game()
+
+        # If the player has not completed an action yet
+        elif not st.session_state.action_complete:
+
+            # Option 1: Use the access code
+            if has_item("Vault Access Code"):
+
+                st.success("🔓 You have the Vault Access Code!")
+
+                if st.button("💎 Take the Star Core"):
+
+                    add_item("Star Core")
+                    increase_security(20)
+
+                    story = generate_story(
+                        "Star Core Vault",
+                        "taking the Star Core",
+                        "The player successfully steals the Star Core.",
+                        "You grab the glowing Star Core. "
+                        "An alarm begins to sound throughout the station!"
+                    )
+
+                    set_result("item", story, "Star Core")
+
+            # Option 2: Force the vault open
+            else:
+
+                st.warning(
+                    "You don't have the Vault Access Code. "
+                    "You will need to force the vault open."
+                )
+
+                if st.button("🔨 Force the vault open"):
+
+                    roll = roll_dice()
+
+                    st.session_state.last_roll = roll
+
+                    if roll >= 6:
+
+                        # SUCCESS: Award the Star Core
+                        add_item("Star Core")
+                        increase_security(20)
+
+                        story = generate_story(
+                            "Star Core Vault",
+                            "forcing open the vault",
+                            "The player successfully opens the vault "
+                            "and steals the Star Core.",
+                            "After a desperate struggle, the vault "
+                            "door opens. You grab the Star Core!"
+                        )
+
+                        set_result("item", story, "Star Core")
+
+                    else:
+
+                        # FAILURE: Damage the player and increase security
+                        take_damage(2)
+                        increase_security(20)
+
+                        story = generate_story(
+                            "Star Core Vault",
+                            "trying to force open the vault",
+                            "The player fails to open the vault "
+                            "and is injured by its defence system.",
+                            "The vault's defence system strikes you. "
+                            "The alarm begins to sound!"
+                        )
+
+                        set_result("damage", story, 2)
+
+            # Option 3: Fight the elite security officer
+            combat_encounter(
+                "⚔️ Fight the Elite Security Officer",
+                "elite security officer",
+                "Star Core Vault",
+                7,
+                2,
+                30,
+                "Security Keycard"
+            )
+
+        # Show the result after an action
+        else:
+
+            show_result()
+
+            # Only allow the player to continue if they have the Star Core
+            if has_item("Star Core"):
+
+                show_continue_button("Enter Escape Bay")
+
+            else:
+
+                st.warning(
+                    "You haven't stolen the Star Core yet. "
+                    "You must try another approach."
+                )
+
+                if st.button("🔁 Try again in the vault"):
+                    retry_action()
+
