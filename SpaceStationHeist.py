@@ -44,7 +44,7 @@ def start_game(name):
     st.session_state.max_health = 5
 
     st.session_state.security = 0
-    st.session_state.inventory = ["Hacking Device"]
+    st.session_state.inventory = ["Hacking Device", "Electronic Baton"]
 
     st.session_state.rooms = [
         "docking_bay",
