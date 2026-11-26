@@ -123,7 +123,7 @@ def remove_item(item):
 def use_medkit():
     if has_item("Medkit"):
 
-        healed = heal_player(3)
+        healed = heal_player(2)
 
         # Only use the Medkit if health was actually restored
         if healed > 0:
@@ -277,7 +277,7 @@ def chance_encounter(
         else:
 
             take_damage(damage)
-            increase_security(15)
+            increase_security(20)
 
             story = generate_story(
                 room,
